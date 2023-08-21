@@ -1,0 +1,27 @@
+#game-field {
+    /* display: flex; */
+    display: inline;
+}
+
+br {
+    height: 0 !important;
+}
+
+#game-field>div {
+    display: inline-block;
+    border: 1px solid lightsalmon;
+    width: 40px;
+    height: 40px;
+    /* margin: 0 0px; */
+    text-align: center;
+}
+
+#game-field>div[data-is-visible="false"] {
+    background-color: gainsboro;
+}
+#game-field>div[data-is-mine="true"] {
+    background-color: darkgrey;
+}
+#game-field>div[data-is-mine="true"][data-is-visible="true"] {
+    background-color: red;
+}

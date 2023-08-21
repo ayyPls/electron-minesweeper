@@ -1,0 +1,12 @@
+{
+  "name": "minesweeper",
+  "version": "1.0.0",
+  "description": "my description",
+  "main": "Main.js",
+  "dependencies": {
+    "electron": "^26.0.0"
+  },
+  "scripts": {
+    "start": "electron ."
+  }
+}
