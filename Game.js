@@ -71,7 +71,6 @@ class Game {
                 const row = event.target.dataset.row
                 const column = event.target.dataset.column
                 const mark = event.target.dataset.isMarked == 'true'
-                console.log(mark);
                 this.cells[row][column].markCell(!mark)
                 event.preventDefault()
                 this.renderGameField()
@@ -86,7 +85,6 @@ class Game {
 
     restartGame() {
         this.isEnded = false
-        this.cells = Array.from({ length: this.FIELD_WIDTH * this.FIELD_HEIGHT }, (_, i) => new FieldCell())
         this.generateCells().renderGameField()
     }
 
@@ -95,10 +93,10 @@ class Game {
             for (let j = 0; j < this.FIELD_WIDTH; j++) {
                 if (this.cells[i][j].isMine)
                     this.cells[i][j].revealCell()
-                this.renderGameField()
             }
         }
         this.isEnded = true
+        this.renderGameField()
     }
 
     revealCells(row, column, revealNeighbors = false) {
@@ -139,19 +137,23 @@ class Game {
             }
         }
 
+
         this.renderGameField();
     }
     // func to render game field
     renderGameField(firstRender = false) {
+        let counterOfMines = 0
+
         this.gameFieldElement.innerHTML = ''
         if (this.gameFieldElement) {
             for (let i = 0; i < this.FIELD_HEIGHT; i++) {
+
                 if (firstRender)
                     this.cells.push([])
                 for (let j = 0; j < this.FIELD_WIDTH; j++) {
                     if (firstRender)
                         this.cells[i].push(new FieldCell(i, j, false))
-
+                    else if (this.cells[i][j].isMine) counterOfMines++
                     let cell = this.gameFieldElement.appendChild(document.createElement('div'))
                     cell.dataset.row = this.cells[i][j].rowNumber
                     cell.dataset.column = this.cells[i][j].columnNumber
@@ -163,6 +165,10 @@ class Game {
                 }
                 this.gameFieldElement.appendChild(document.createElement("br"))
             }
+        }
+        if (this.FIELD_HEIGHT * this.FIELD_WIDTH - this.cells.flat().filter(cell => cell.isMine == false && cell.isVisible).length - Math.floor(this.FIELD_HEIGHT * this.FIELD_WIDTH / 8 + 1) == 0) {
+            alert('win')
+            this.isEnded = true
         }
     }
 
