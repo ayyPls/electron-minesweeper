@@ -5,6 +5,8 @@ class FieldCell {
     columnNumber = 0
     amountOfMinesAround = 0
 
+    isMarked = false
+
     constructor(row = 0, column = 0, mine = false) {
         this.rowNumber = row
         this.columnNumber = column
@@ -25,6 +27,10 @@ class FieldCell {
     revealCell() {
         this.isVisible = true
         return this
+    }
+
+    markCell(newState = false) {
+        this.isMarked = newState
     }
 }
 
@@ -59,8 +65,23 @@ class Game {
                 this.revealCells(+row, +column, true)
             }
         })
+
+        this.gameFieldElement.addEventListener('contextmenu', event => {
+            if (!this.isEnded) {
+                const row = event.target.dataset.row
+                const column = event.target.dataset.column
+                const mark = event.target.dataset.isMarked == 'true'
+                console.log(mark);
+                this.cells[row][column].markCell(!mark)
+                event.preventDefault()
+                this.renderGameField()
+            }
+        })
+
         this.renderGameField(true)
+
         return this
+
     }
 
     restartGame() {
@@ -137,7 +158,8 @@ class Game {
                     cell.dataset.isMine = this.cells[i][j].isMine
                     cell.dataset.minesAround = this.cells[i][j].amountOfMinesAround
                     cell.dataset.isVisible = this.cells[i][j].isVisible
-                    cell.textContent = this.cells[i][j].amountOfMinesAround
+                    cell.dataset.isMarked = this.cells[i][j].isMarked
+                    cell.textContent = !this.cells[i][j].isVisible && this.cells[i][j].isMarked ? 'M' : this.cells[i][j].amountOfMinesAround
                 }
                 this.gameFieldElement.appendChild(document.createElement("br"))
             }
