@@ -1,5 +1,3 @@
-
-
 class FieldCell {
     isVisible = false
     isMine = false
@@ -32,25 +30,24 @@ class FieldCell {
 
 
 class Game {
-    isStarted = false
+    isEnded = false
     gameFieldElement = null
     FIELD_HEIGHT = 0
     FIELD_WIDTH = 0
     cells = []
     constructor(fieldHeight = 4, fieldWidth = 6) {
+        document.getElementById('restart').addEventListener('click', event => {
+            this.restartGame()
+        })
         this.FIELD_HEIGHT = fieldHeight
         this.FIELD_WIDTH = fieldWidth
         this.gameFieldElement = document.getElementById('game-field')
 
-
-
         this.gameFieldElement.addEventListener('click', (event) => {
-            console.log(event.target.dataset);
 
             // handle first click to render cells   
             const row = event.target.dataset.row
             const column = event.target.dataset.column
-            // const isMine = event.target.dataset.isMine
             const isVisible = event.target.dataset.isVisible
             if (this.cells.flat().some(cell => cell.isVisible)) {
                 if (isVisible == 'false') {
@@ -59,93 +56,73 @@ class Game {
             }
             else {
                 this.generateCells(+row, +column);
-                this.revealCells(+row, +column)
+                this.revealCells(+row, +column, true)
             }
-
-
-            // if (isVisible == 'false') {
-            //     this.revealCells(+row, +column)
-            // }
         })
         this.renderGameField(true)
         return this
     }
 
+    restartGame() {
+        this.isEnded = false
+        this.cells = Array.from({ length: this.FIELD_WIDTH * this.FIELD_HEIGHT }, (_, i) => new FieldCell())
+        this.generateCells().renderGameField()
+    }
+
+    endGame() {
+        for (let i = 0; i < this.FIELD_HEIGHT; i++) {
+            for (let j = 0; j < this.FIELD_WIDTH; j++) {
+                if (this.cells[i][j].isMine)
+                    this.cells[i][j].revealCell()
+                this.renderGameField()
+            }
+        }
+        this.isEnded = true
+    }
+
+    revealCells(row, column, revealNeighbors = false) {
+        if (
+            row < 0 ||
+            row >= this.FIELD_HEIGHT ||
+            column < 0 ||
+            column >= this.FIELD_WIDTH ||
+            this.cells[row][column].isVisible
+            || this.isEnded
+        ) {
+            return;
+        }
 
 
-    revealCells(row, column) {
-        // set cell to visible
-        // this.cells[row][column].revealCell();
+        if (this.cells[row][column].isMine && !revealNeighbors) {
+            return this.endGame()
 
-        // if cell is not a mine and hasn't been revealed yet
-        if (!this.cells[row][column].isMine && !this.cells[row][column].isVisible) {
-            this.cells[row][column].revealCell(); // Mark the cell as revealed
+        }
+        else this.cells[row][column].revealCell()
 
-            // map by neighbors
+        if (this.cells[row][column].amountOfMinesAround === 0 || revealNeighbors) {
             for (let xOffset = -1; xOffset <= 1; xOffset++) {
                 for (let yOffset = -1; yOffset <= 1; yOffset++) {
                     const neighborRow = row + xOffset;
                     const neighborCol = column + yOffset;
 
                     if (
+                        neighborRow >= 0 &&
+                        neighborRow < this.FIELD_HEIGHT &&
                         neighborCol >= 0 &&
                         neighborCol < this.FIELD_WIDTH &&
-                        neighborRow >= 0 &&
-                        neighborRow < this.FIELD_HEIGHT
+                        this.cells[neighborRow][neighborCol].isMine == false
                     ) {
-                        if (this.cells[neighborRow][neighborCol].amountOfMinesAround === 0) {
-                            // Recursive call only for unrevealed neighbors
-                            if (!this.cells[neighborRow][neighborCol].isVisible) {
-                                this.revealCells(neighborRow, neighborCol);
-                            }
-                        } else {
-                            // If a neighbor has mines around, reveal it
-                            if (this.cells[neighborRow][neighborCol].isMine == false)
-                                this.cells[neighborRow][neighborCol].revealCell();
-                        }
+                        this.revealCells(neighborRow, neighborCol, false);
                     }
                 }
             }
         }
-        return this.renderGameField()
+
+        this.renderGameField();
     }
-
-    // fillWithCells() {
-    //     for (let i = 0; i < this.FIELD_HEIGHT; i++) {
-    //         this.cells.push([])
-    //         for (let j = 0; j < this.FIELD_WIDTH; j++) {
-    //             this.cells[i].push(new FieldCell(i, j, false))
-    //         }
-    //     }
-
-    //     console.log(this.cells);
-    //     return this
-    // }
-
-    // placeMines(minesAmount) {
-    //     console.log(minesAmount);
-    //     let minesLeft = minesAmount
-    //     if (minesLeft < 0)
-    //         return
-
-    //     for (let i = 0; i < this.FIELD_HEIGHT; i++) {
-    //         for (let j = 0; j < this.FIELD_WIDTH.length; j++) {
-    //             const isMine = Math.random() < 0.5 && this.cells[i][j].isMine == false && minesLeft > 0
-    //             if (isMine) {
-    //                 minesLeft = minesLeft - 1
-    //                 this.cells[i][j].setMine(isMine)
-    //             }
-
-    //             console.log(this.cells[i][j]);
-    //         }
-    //     }
-    //     return this.placeMines(minesLeft)
-    // }
     // func to render game field
     renderGameField(firstRender = false) {
         this.gameFieldElement.innerHTML = ''
-        // let minesArray = Array.of(minesAmount)
-        // let minesLeft = minesAmount
         if (this.gameFieldElement) {
             for (let i = 0; i < this.FIELD_HEIGHT; i++) {
                 if (firstRender)
@@ -153,31 +130,24 @@ class Game {
                 for (let j = 0; j < this.FIELD_WIDTH; j++) {
                     if (firstRender)
                         this.cells[i].push(new FieldCell(i, j, false))
-                    // const isMine = Math.random() < 0.5;
-                    // if (isMine) {
-                    //     minesLeft -= 1
-                    // }
-                    // this.cells[i].push(new FieldCell(i, j))
-                    // move in function
+
                     let cell = this.gameFieldElement.appendChild(document.createElement('div'))
                     cell.dataset.row = this.cells[i][j].rowNumber
                     cell.dataset.column = this.cells[i][j].columnNumber
                     cell.dataset.isMine = this.cells[i][j].isMine
                     cell.dataset.minesAround = this.cells[i][j].amountOfMinesAround
-                    cell.textContent = this.cells[i][j].amountOfMinesAround
                     cell.dataset.isVisible = this.cells[i][j].isVisible
+                    cell.textContent = this.cells[i][j].amountOfMinesAround
                 }
                 this.gameFieldElement.appendChild(document.createElement("br"))
             }
         }
-        // this.setMines(minesAmount)
     }
 
-
     // generate double array of mines && set mines
-    generateCells(firstRenderRow, firstRendereCol) {
+    generateCells(firstRenderRow, firstRenderedCol) {
         this.cells = []
-        let trueCount = this.FIELD_HEIGHT * this.FIELD_WIDTH / 6
+        let trueCount = this.FIELD_HEIGHT * this.FIELD_WIDTH / 8
         for (let i = 0; i < this.FIELD_HEIGHT; i++) {
             this.cells.push([])
             for (let j = 0; j < this.FIELD_WIDTH; j++) {
@@ -189,7 +159,9 @@ class Game {
             const randomRow = Math.floor(Math.random() * this.FIELD_HEIGHT);
             const randomCol = Math.floor(Math.random() * this.FIELD_WIDTH);
 
-            if (this.cells[randomRow][randomCol].isMine === false && (randomRow !== firstRenderRow && randomCol !== firstRendereCol)) {
+            if (this.cells[randomRow][randomCol].isMine === false &&
+                (randomRow !== firstRenderRow && randomCol !== firstRenderedCol)
+            ) {
                 this.cells[randomRow][randomCol].setMine();
                 trueCount--;
             }
@@ -223,4 +195,4 @@ class Game {
     }
 }
 
-new Game(10, 10).renderGameField()
+new Game(9, 9).renderGameField()
