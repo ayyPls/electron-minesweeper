@@ -42,6 +42,7 @@ class Timer {
     interval = null
     constructor() {
         this.timerElement = document.getElementById('timer')
+        return this
     }
     startTimer() {
         this.startTime = new Date().getTime()
@@ -49,7 +50,6 @@ class Timer {
             this.updateTimer()
         }, 1000)
     }
-
     updateTimer() {
         if (this.startTime) {
             const currentTime = new Date().getTime();
@@ -59,15 +59,13 @@ class Timer {
             this.timerElement.textContent = `TIME: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
         }
     }
-
     stopTimer() {
         clearInterval(this.interval)
+        this.startTime = new Date().getTime()
     }
 }
 
 class Game {
-    startTime = null
-    timerElement = null
     timer = null
 
     isEnded = false
@@ -76,8 +74,7 @@ class Game {
     FIELD_WIDTH = 0
     cells = []
     constructor(fieldHeight = 4, fieldWidth = 6) {
-
-        this.timerElement = document.getElementById('timer')
+        this.timer = new Timer()
 
         document.getElementById('restart').addEventListener('click', event => {
             this.restartGame()
@@ -87,7 +84,6 @@ class Game {
         this.gameFieldElement = document.getElementById('game-field')
 
         this.gameFieldElement.addEventListener('click', (event) => {
-
 
             // handle first click to render cells   
             const row = event.target.dataset.row
@@ -99,7 +95,7 @@ class Game {
                 }
             }
             else {
-                this.startTimer()
+                this.timer.startTimer()
                 this.generateCells(+row, +column);
                 this.revealCells(+row, +column, true)
             }
@@ -122,29 +118,9 @@ class Game {
 
     }
 
-    startTimer() {
-        this.startTime = new Date().getTime(); // Запоминаем время начала игры
-        this.timer = setInterval(() => {
-            this.updateTimer()
-        }, 1000)
-    }
-
-    updateTimer() {
-        if (this.startTime) {
-            const currentTime = new Date().getTime();
-            const elapsedTime = currentTime - this.startTime;
-            const minutes = Math.floor(elapsedTime / 60000);
-            const seconds = Math.floor((elapsedTime % 60000) / 1000);
-            this.timerElement.textContent = `TIME: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-        }
-    }
-
-    stopTimer() {
-        clearInterval(this.timer)
-    }
-
     restartGame() {
         this.isEnded = false
+        this.timer.stopTimer()
         this.generateCells().renderGameField()
     }
 
@@ -156,7 +132,7 @@ class Game {
             }
         }
         this.isEnded = true
-        this.stopTimer();
+        this.timer.stopTimer();
         return this
     }
 

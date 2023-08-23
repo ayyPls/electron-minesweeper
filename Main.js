@@ -11,7 +11,7 @@ class Main {
     createWindow() {
         this.window = new BrowserWindow({
             width: 1000,
-            height: 500,
+            height: 1000,
             webPreferences: {
                 nodeIntegration: true,
                 contextIsolation: false,
