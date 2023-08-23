@@ -35,6 +35,36 @@ class FieldCell {
 }
 
 
+
+class Timer {
+    startTime = null
+    timerElement = null
+    interval = null
+    constructor() {
+        this.timerElement = document.getElementById('timer')
+    }
+    startTimer() {
+        this.startTime = new Date().getTime()
+        this.interval = setInterval(() => {
+            this.updateTimer()
+        }, 1000)
+    }
+
+    updateTimer() {
+        if (this.startTime) {
+            const currentTime = new Date().getTime();
+            const elapsedTime = currentTime - this.startTime;
+            const minutes = Math.floor(elapsedTime / 60000);
+            const seconds = Math.floor((elapsedTime % 60000) / 1000);
+            this.timerElement.textContent = `TIME: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+        }
+    }
+
+    stopTimer() {
+        clearInterval(this.interval)
+    }
+}
+
 class Game {
     startTime = null
     timerElement = null
@@ -47,11 +77,7 @@ class Game {
     cells = []
     constructor(fieldHeight = 4, fieldWidth = 6) {
 
-        // this.startTime = null;
-        this.timerElement = document.getElementById('timer'); // ID элемента для отображения таймера
-
-        this.updateTimer();
-
+        this.timerElement = document.getElementById('timer')
 
         document.getElementById('restart').addEventListener('click', event => {
             this.restartGame()
@@ -119,9 +145,7 @@ class Game {
 
     restartGame() {
         this.isEnded = false
-        this.startTime = new Date().getTime()
         this.generateCells().renderGameField()
-        // this.startTimer();
     }
 
     endGame() {
@@ -132,7 +156,7 @@ class Game {
             }
         }
         this.isEnded = true
-        this.updateTimer();
+        this.stopTimer();
         return this
     }
 
@@ -150,7 +174,6 @@ class Game {
 
 
         if (this.cells[row][column].isMine && !revealNeighbors) {
-            this.stopTimer()
             return this.endGame().renderGameField()
 
         }
@@ -212,7 +235,6 @@ class Game {
 
         if (this.FIELD_HEIGHT * this.FIELD_WIDTH - this.cells.flat().filter(cell => cell.isMine == false && cell.isVisible).length - Math.floor(this.FIELD_HEIGHT * this.FIELD_WIDTH / 8 + 1) == 0) {
             alert('win')
-            this.stopTimer()
             this.endGame()
         }
     }
