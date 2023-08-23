@@ -36,12 +36,23 @@ class FieldCell {
 
 
 class Game {
+    startTime = null
+    timerElement = null
+    timer = null
+
     isEnded = false
     gameFieldElement = null
     FIELD_HEIGHT = 0
     FIELD_WIDTH = 0
     cells = []
     constructor(fieldHeight = 4, fieldWidth = 6) {
+
+        // this.startTime = null;
+        this.timerElement = document.getElementById('timer'); // ID элемента для отображения таймера
+
+        this.updateTimer();
+
+
         document.getElementById('restart').addEventListener('click', event => {
             this.restartGame()
         })
@@ -50,6 +61,7 @@ class Game {
         this.gameFieldElement = document.getElementById('game-field')
 
         this.gameFieldElement.addEventListener('click', (event) => {
+
 
             // handle first click to render cells   
             const row = event.target.dataset.row
@@ -61,6 +73,7 @@ class Game {
                 }
             }
             else {
+                this.startTimer()
                 this.generateCells(+row, +column);
                 this.revealCells(+row, +column, true)
             }
@@ -83,9 +96,32 @@ class Game {
 
     }
 
+    startTimer() {
+        this.startTime = new Date().getTime(); // Запоминаем время начала игры
+        this.timer = setInterval(() => {
+            this.updateTimer()
+        }, 1000)
+    }
+
+    updateTimer() {
+        if (this.startTime) {
+            const currentTime = new Date().getTime();
+            const elapsedTime = currentTime - this.startTime;
+            const minutes = Math.floor(elapsedTime / 60000);
+            const seconds = Math.floor((elapsedTime % 60000) / 1000);
+            this.timerElement.textContent = `TIME: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+        }
+    }
+
+    stopTimer() {
+        clearInterval(this.timer)
+    }
+
     restartGame() {
         this.isEnded = false
+        this.startTime = new Date().getTime()
         this.generateCells().renderGameField()
+        // this.startTimer();
     }
 
     endGame() {
@@ -96,7 +132,8 @@ class Game {
             }
         }
         this.isEnded = true
-        this.renderGameField()
+        this.updateTimer();
+        return this
     }
 
     revealCells(row, column, revealNeighbors = false) {
@@ -113,7 +150,8 @@ class Game {
 
 
         if (this.cells[row][column].isMine && !revealNeighbors) {
-            return this.endGame()
+            this.stopTimer()
+            return this.endGame().renderGameField()
 
         }
         else this.cells[row][column].revealCell()
@@ -136,8 +174,6 @@ class Game {
                 }
             }
         }
-
-
         this.renderGameField();
     }
     // func to render game field
@@ -161,14 +197,23 @@ class Game {
                     cell.dataset.minesAround = this.cells[i][j].amountOfMinesAround
                     cell.dataset.isVisible = this.cells[i][j].isVisible
                     cell.dataset.isMarked = this.cells[i][j].isMarked
-                    cell.textContent = !this.cells[i][j].isVisible && this.cells[i][j].isMarked ? 'M' : this.cells[i][j].amountOfMinesAround
+                    cell.textContent = this.cells[i][j].isMine && this.cells[i][j].isVisible ? "💣" : this.cells[i][j].isVisible && this.cells[i][j].amountOfMinesAround
+                        ? this.cells[i][j].amountOfMinesAround
+                        : this.cells[i][j].isMarked ? 'M' : "."
                 }
                 this.gameFieldElement.appendChild(document.createElement("br"))
             }
         }
+
+        const markedMinesAmount = this.cells.flat().filter(cell => cell.isMarked && !cell.isVisible).length
+        const currentMinesAmount = Math.floor(this.FIELD_HEIGHT * this.FIELD_WIDTH / 8 + 1) - markedMinesAmount
+        document.getElementById('mines-marked').textContent = "Mines marked: " + markedMinesAmount
+        document.getElementById('mines-left').textContent = "Mines left: " + currentMinesAmount
+
         if (this.FIELD_HEIGHT * this.FIELD_WIDTH - this.cells.flat().filter(cell => cell.isMine == false && cell.isVisible).length - Math.floor(this.FIELD_HEIGHT * this.FIELD_WIDTH / 8 + 1) == 0) {
             alert('win')
-            this.isEnded = true
+            this.stopTimer()
+            this.endGame()
         }
     }
 
