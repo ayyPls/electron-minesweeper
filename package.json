@@ -4,9 +4,14 @@
   "description": "my description",
   "main": "Main.js",
   "dependencies": {
-    "electron": "^26.0.0"
+    "chai": "^4.3.8",
+    "electron": "^26.0.0",
+    "jsdom": "^22.1.0",
+    "mocha": "^10.2.0"
   },
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "test": "mocha Test.js",
+    "test-game": "mocha Test2.js"
   }
 }

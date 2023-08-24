@@ -1,69 +1,5 @@
-class FieldCell {
-    isVisible = false
-    isMine = false
-    rowNumber = 0
-    columnNumber = 0
-    amountOfMinesAround = 0
-
-    isMarked = false
-
-    constructor(row = 0, column = 0, mine = false) {
-        this.rowNumber = row
-        this.columnNumber = column
-        this.isMine = mine
-        return this
-    }
-
-    setMine() {
-        this.isMine = true
-        return this
-    }
-
-    setAmountOfMinesAround(count = 0) {
-        this.amountOfMinesAround = count
-        return this
-    }
-
-    revealCell() {
-        this.isVisible = true
-        return this
-    }
-
-    markCell(newState = false) {
-        this.isMarked = newState
-    }
-}
-
-
-
-class Timer {
-    startTime = null
-    timerElement = null
-    interval = null
-    constructor() {
-        this.timerElement = document.getElementById('timer')
-        return this
-    }
-    startTimer() {
-        this.startTime = new Date().getTime()
-        this.interval = setInterval(() => {
-            this.updateTimer()
-        }, 1000)
-    }
-    updateTimer() {
-        if (this.startTime) {
-            const currentTime = new Date().getTime();
-            const elapsedTime = currentTime - this.startTime;
-            const minutes = Math.floor(elapsedTime / 60000);
-            const seconds = Math.floor((elapsedTime % 60000) / 1000);
-            this.timerElement.textContent = `TIME: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-        }
-    }
-    stopTimer() {
-        clearInterval(this.interval)
-        this.startTime = new Date().getTime()
-    }
-}
+const FieldCell = require("./FieldCell")
+const Timer = require("./Timer")
 
 class Game {
     timer = null
@@ -267,3 +203,5 @@ class Game {
 }
 
 new Game(9, 9).renderGameField()
+
+module.exports = Game

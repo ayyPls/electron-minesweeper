@@ -1,5 +1,4 @@
-const { app, BrowserWindow, ipcMain, Menu } = require('electron');
-const path = require('path');
+const { app, BrowserWindow } = require('electron');
 
 class Main {
     window = null
