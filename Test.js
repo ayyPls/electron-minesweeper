@@ -1,10 +1,38 @@
+
+const { JSDOM } = require('jsdom');
+
+
+const dom = new JSDOM(`<!DOCTYPE html>
+    <html lang="en">
+    
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Minesweeper</title>
+    </head>
+    
+    <body>
+        <div id="game">
+            <div id="timer"></div>
+            <div id="mines-marked"></div>
+            <div id="mines-left"></div>
+            <div id="timer"></div>
+            <h1>Minesweeper</h1>
+            <div id="game-controls">
+                <button id="restart">😁</button>
+            </div>
+            <div id="game-field"></div>
+        </div>
+    </body>    
+    </html>`
+)
+global.document = dom.window.document;
+
+const Timer = require('./Timer');
+const Game = require('./Game');
 const FieldCell = require('./FieldCell');
 const { expect } = require('chai');
-const { JSDOM } = require('jsdom');
-const Timer = require('./Timer');
 
-const dom = new JSDOM('<!DOCTYPE html><html><body><div id="game"><div id="timer"></div><div id="mines-marked"></div><div id="mines-left"></div><div id="timer"></div><h1>Minesweeper</h1><div id="game-controls"><button id="restart">😁</button></div><div id="game-field"></div></div></body></html>')
-global.document = dom.window.document;
 
 describe('test cell', () => {
     let cell = new FieldCell(1, 2, false)
@@ -40,4 +68,34 @@ describe('test timer start work', () => {
         timer.stopTimer()
         expect(timer.interval._destroyed).to.be.true
     })
+})
+
+
+describe('test create game', () => {
+    const game = new Game(9, 9)
+    it('game is created', () => {
+        expect(game).to.be.not.undefined
+        expect(game.cells.length).equal(9)
+    })
+
+    it('game generates game field with mines on first click', () => {
+        game.generateCells(0, 0)
+        expect(game.cells.flat().some(mine=>mine.isMine)).to.be.true
+    })
+
+    it('reveal cells', ()=>{
+        game.revealCells(1, 1)
+        expect(game.cells[1][1].isVisible).to.be.true
+    })
+
+    it('game over', ()=>{
+        game.endGame()
+        expect(game.isEnded).to.be.true
+    })
+    it('restart game', ()=>{
+        expect(game.isEnded).to.be.true
+        game.restartGame()
+        expect(game.isEnded).to.be.false
+    })
+
 })
