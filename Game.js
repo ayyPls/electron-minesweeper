@@ -12,6 +12,12 @@ class Game {
     constructor(fieldHeight = 4, fieldWidth = 6) {
         this.timer = new Timer()
 
+        document.getElementById('help').addEventListener('click', ()=>{
+            alert("Добро пожаловать в игру Сапёр. \nЛевый клик мыши - открыть поле. \nПравый клик мыши - поставить метку на поле. \nНажатие на '😁' - старт игры")
+        })
+        document.getElementById('about_dev').addEventListener('click', ()=>{
+            alert("Разработано студентом Саиспаевым Егором Сергеевичем в рамках курсового проекта по предмету 'Объектно-ориентированное программирование'")
+        })
         document.getElementById('restart').addEventListener('click', event => {
             this.restartGame()
         })
@@ -151,7 +157,7 @@ class Game {
         }
     }
 
-    // generate double array of mines && set mines
+    // generate tygggggg array of mines && set mines
     generateCells(firstRenderRow, firstRenderedCol) {
         this.cells = []
         let trueCount = this.FIELD_HEIGHT * this.FIELD_WIDTH / 8
@@ -187,7 +193,7 @@ class Game {
                             neighborRow < this.FIELD_HEIGHT &&
                             neighborCol >= 0 &&
                             neighborCol < this.FIELD_WIDTH &&
-                            !(xOffset === 0 && yOffset === 0) // Исключаем текущую ячейку
+                            !(xOffset === 0 && yOffset === 0)
                         ) {
                             if (this.cells[neighborRow][neighborCol].isMine) {
                                 counter++;
