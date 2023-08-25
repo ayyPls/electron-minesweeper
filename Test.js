@@ -12,18 +12,24 @@ const dom = new JSDOM(`<!DOCTYPE html>
     </head>
     
     <body>
-        <div id="game">
-            <div id="timer"></div>
-            <div id="mines-marked"></div>
-            <div id="mines-left"></div>
-            <div id="timer"></div>
-            <h1>Minesweeper</h1>
-            <div id="game-controls">
-                <button id="restart">😁</button>
-            </div>
-            <div id="game-field"></div>
+    <div id="game">
+        <div id="timer"></div>
+        <div id="mines-marked"></div>
+        <div id="mines-left"></div>
+        <div id="timer"></div>
+        <h1>Minesweeper</h1>
+        <div id="game-controls">
+            <button id="restart">😁</button>
         </div>
-    </body>    
+        <div id="game-field"></div>
+    </div>
+    <br/>
+    <div>
+        <p>О программе</p>
+        <button id="help">Справка</button>
+        <button id="about_dev">О разработчике</button>
+    </div>
+    </body>
     </html>`
 )
 global.document = dom.window.document;
@@ -80,19 +86,19 @@ describe('test create game', () => {
 
     it('game generates game field with mines on first click', () => {
         game.generateCells(0, 0)
-        expect(game.cells.flat().some(mine=>mine.isMine)).to.be.true
+        expect(game.cells.flat().some(mine => mine.isMine)).to.be.true
     })
 
-    it('reveal cells', ()=>{
+    it('reveal cells', () => {
         game.revealCells(1, 1)
         expect(game.cells[1][1].isVisible).to.be.true
     })
 
-    it('game over', ()=>{
+    it('game over', () => {
         game.endGame()
         expect(game.isEnded).to.be.true
     })
-    it('restart game', ()=>{
+    it('restart game', () => {
         expect(game.isEnded).to.be.true
         game.restartGame()
         expect(game.isEnded).to.be.false
